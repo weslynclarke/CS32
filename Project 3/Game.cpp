@@ -6,7 +6,7 @@
 #include "Piece.h"
 #include "UserInterface.h"
 #include <string>
-
+#include <queue>
 
 using namespace std;
 
@@ -34,309 +34,110 @@ const int NEXT_PIECE_TITLE_Y = 3;
 const int NEXT_PIECE_X = 16;
 const int NEXT_PIECE_Y = 4;
 
-const char pieces[10 /*10 different shapes*/][4 /*4 different rotations for each*/][4][4] =
-{
-	{ // I, 0
-		{ // I orientation 0
-			{ '.','.','.','.' },
-			{ '#','#','#','#' },
-			{ '.','.','.','.' },
-			{ '.','.','.','.' }
-		},
-			{ // I orientation 1
-				{ '.','#','.','.' },
-{ '.','#','.','.' },
-{ '.','#','.','.' },
-{ '.','#','.','.' }
-			},
-			{ // I orientation 2
-				{ '.', '.', '.', '.' },
-{ '#','#','#','#' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // I orientation 3
-				{ '.','#','.','.' },
-{ '.','#','.','.' },
-{ '.','#','.','.' },
-{ '.','#','.','.' }
-			}
-	},
-		{ // L, 1
-			{ // L orientation 0
-				{ '.','.','.','.' },
-{ '#','#','#','.' },
-{ '#','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // L orientation 1
-				{ '.','#','#','.' },
-{ '.','.','#','.' },
-{ '.','.','#','.' },
-{ '.','.','.','.' }
-			},
-			{ // L orientation 2
-				{ '.','.','.','.' },
-{ '.','.','#','.' },
-{ '#','#','#','.' },
-{ '.','.','.','.' }
-			},
-			{ // L orientation 3
-				{ '.','.','.','.' },
-{ '.','#','.','.' },
-{ '.','#','.','.' },
-{ '.','#','#','.' }
-			}
-		},
-		{ // J, 2
-			{ // J orientation 0
-				{ '.','.','.','.' },
-{ '.','#','#','#' },
-{ '.','.','.','#' },
-{ '.','.','.','.' }
-			},
-			{ // J orientation 1
-				{ '.','.','.','.' },
-{ '.','.','#','.' },
-{ '.','.','#','.' },
-{ '.','#','#','.' }
-			},
-			{ // J orientation 2
-				{ '.','.','.','.' },
-{ '.','#','.','.' },
-{ '.','#','#','#' },
-{ '.','.','.','.' }
-			},
-			{
-				{ '.','#','#','.' },
-{ '.','#','.','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' }
-			},
-		},
-		{ // T, 3
-			{ // T orientation 0
-				{ '.','#','.','.' },
-{ '#','#','#','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // T orientation 1
-				{ '.','#','.','.' },
-{ '.','#','#','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // T orientation 2
-				{ '.','.','.','.' },
-{ '#','#','#','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // T orientation 3
-				{ '.','#','.','.' },
-{ '#','#','.','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' }
-			},
-		},
-		{ // O, 4 
-			{ // O orientation 0
-				{ '#','#','.','.' },
-{ '#','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // O orientation 1
-				{ '#','#','.','.' },
-{ '#','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // O orientation 2
-				{ '#','#','.','.' },
-{ '#','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // O orientation 3
-				{ '#','#','.','.' },
-{ '#','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-		},
-		{ // S, 5 
-			{ // S orientation 0
-				{ '.','.','.','.' },
-{ '.','#','#','.' },
-{ '#','#','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // S orientation 1
-				{ '.','#','.','.' },
-{ '.','#','#','.' },
-{ '.','.','#','.' },
-{ '.','.','.','.' }
-			},
-			{ // S orientation 2
-				{ '.','.','.','.' },
-{ '.','#','#','.' },
-{ '#','#','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // S orientation 3
-				{ '.','#','.','.' },
-{ '.','#','#','.' },
-{ '.','.','#','.' },
-{ '.','.','.','.' }
-			},
-		},
-		{ // Z, 6
-			{ // Z orientation 0
-				{ '.','.','.','.' },
-{ '#','#','.','.' },
-{ '.','#','#','.' },
-{ '.','.','.','.' }
-			},
-			{ // Z orientation 1
-				{ '.','.','#','.' },
-{ '.','#','#','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // Z orientation 2
-				{ '.','.','.','.' },
-{ '#','#','.','.' },
-{ '.','#','#','.' },
-{ '.','.','.','.' }
-			},
-			{ // Z orientation 3
-				{ '.','.','#','.' },
-{ '.','#','#','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' }
-			},
-		},
-		{ // vapor, 7
-			{ // vapor orientation 0
-				{ '.','#','#','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // vapor orientation 1
-				{ '.','#','#','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // vapor orientation 2
-				{ '.','#','#','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // vapor orientation 3
-				{ '.','#','#','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			}
-		},
-		{ // foam, 8
-			{ // foam orientation 0
-				{ '.','.','.','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // foam orientation 1
-				{ '.','.','.','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // foam orientation 2
-				{ '.','.','.','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // foam orientation 3
-				{ '.','.','.','.' },
-{ '.','#','.','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-		},
-		{ // crazy shape, 9
-			{ // crazy shape orientation 0
-				{ '#','.','.','#' },
-{ '.','#','#','.' },
-{ '.','.','.','.' },
-{ '.','.','.','.' }
-			},
-			{ // crazy shape orientation 1
-				{ '.','.','.','#' },
-{ '.','.','#','.' },
-{ '.','.','#','.' },
-{ '.','.','.','#' }
-			},
-			{ // crazy shape orientation 2
-				{ '.','.','.','.' },
-{ '.','.','.','.' },
-{ '.','#','#','.' },
-{ '#','.','.','#' }
-			},
-			{ // crazy shape orientation 3
-				{ '#','.','.','.' },
-{ '.','#','.','.' },
-{ '.','#','.','.' },
-{ '#','.','.','.' }
-			}
-		}
-};
-
 Game::Game(int width, int height)
- : m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1)
+	: m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1)
 {
-	maxTime = 1000 - (100 * (m_level - 1));
-	m_well = new Well;
-	down = 0;
+	maxTime = 1000 - (100 * (m_level - 1)); // initialize the maximum time
+	down = 0; // assigning numbers to directions
 	right = 1;
 	left = 2;
 	same = 3;
-	mScore = 0;
-	scoreCalled = 0;
-	rowsLeft = 5;
+	mScore = 0; // score starts at zero
+	scoreCalled = 0; // number of times the function scoreCalled has been called
+	rowsLeft = 5; // initial rows left begins at 5
+	currentPiece = nullptr; // set current piece as a new piece pointer
+	nextPiece = nullptr; // set nextPiece to nullptr
+	m_well = new Well; // build the well initially
+}
+
+Piece* Game::chooseRandomPiece(int& pieceNum)
+{
+	switch (chooseRandomPieceType())
+	{
+	case PIECE_I:
+		pieceNum = 0;
+		return new PieceI; // make the next piece an I piece
+		break;
+	case PIECE_L:
+		pieceNum = 1;
+		return new PieceL; // make the next piece an L piece
+		break;
+	case PIECE_J:
+		pieceNum = 2;
+		return new PieceJ; // make the next piece a J piece
+		break;
+	case PIECE_T:
+		pieceNum = 3;
+		return new PieceT; // make the next piece a T piece
+		break;
+	case PIECE_O:
+		pieceNum = 4;
+		return new PieceO; // make the next piece an O piece
+		break;
+	case PIECE_S:
+		pieceNum = 5;
+		return new PieceS; // make the next piece an S piece
+		break;
+	case PIECE_Z:
+		pieceNum = 6;
+		return new PieceZ; // make the next piece a Z piece
+		break;
+	case PIECE_VAPOR:
+		pieceNum = 7;
+		return new PieceVapor; // make the next piece a vapor piece
+		break;
+	case PIECE_FOAM:
+		pieceNum = 8;
+		return new PieceFoam; // make the next piece a foam piece
+		break;
+	case PIECE_CRAZY:
+		pieceNum = 9;
+		return new PieceCrazy; // make the next piece a crazy piece
+		break;
+	}
+	return nullptr;
+}
+
+void Game::chooseNextPiece()
+{
+	nextPiece = chooseRandomPiece(nextPieceNum); // set next piece to something else and update nextPieceNum
+}
+
+void Game::updatePieces()
+{
+	if (currentPiece != nullptr)
+		delete currentPiece; // delete what is stored at current pointer
+	currentPiece = nextPiece; // assign current to next
+	currentPieceNum = nextPieceNum; // set the current piece to the next piece
+	chooseNextPiece(); // set next piece to something else
 }
 
 void Game::play()
 {
-    m_well->display(m_screen, WELL_X, WELL_Y);
-	levelStarted = false;
-    displayStatus();  //  score, rows left, level
-    displayPrompt("Press the Enter key to begin playing Chetyris!");
-    waitForEnter();  // [in UserInterface.h]
-	nextPiece = chooseRandomPieceType();
-    for(;;)
-    {
-        if ( ! playOneLevel())
-            break;
-        displayPrompt("Good job!  Press the Enter key to start next level!");
-        waitForEnter();
-        m_level++; // after every level, increase by one
-    }
-    displayPrompt("Game Over!  Press the Enter key to exit!");
-    waitForEnter();
+	m_well->display(m_screen, WELL_X, WELL_Y); // display the well
+	levelStarted = false; // level hasn't started so display status wont draw next piece
+	displayStatus();  //  score, rows left, level
+	displayPrompt("Press the Enter key to begin playing Chetyris!");
+	waitForEnter();  // [in UserInterface.h]
+
+	for (;;)
+	{
+		chooseNextPiece();
+		if (!playOneLevel())
+			break;
+		displayPrompt("Good job!  Press the Enter key to start next level!");
+		waitForEnter();
+		m_level++; // after every level, increase by one
+	}
+	displayPrompt("Game Over!  Press the Enter key to exit!");
+	waitForEnter();
 }
 
-void Game::displayPrompt(std::string s)     
+void Game::displayPrompt(std::string s)
 {
-    m_screen.gotoXY(PROMPT_X, PROMPT_Y);
-    m_screen.printStringClearLine(s);   // overwrites previous text
-    m_screen.refresh();
+	m_screen.gotoXY(PROMPT_X, PROMPT_Y);
+	m_screen.printStringClearLine(s);   // overwrites previous text
+	m_screen.refresh();
 }
 
 void Game::displayStatus()
@@ -347,7 +148,7 @@ void Game::displayStatus()
 		m_screen.printString("Next piece:"); // insert Next piece string
 		for (int i = NEXT_PIECE_Y; i < NEXT_PIECE_Y + 4; i++) // clear the area where a piece was previously drawn for new piece
 		{
-			m_screen.gotoXY(NEXT_PIECE_X, i); 
+			m_screen.gotoXY(NEXT_PIECE_X, i);
 			m_screen.printStringClearLine("");
 		}
 		drawPiece(m_screen, NEXT_PIECE_X, NEXT_PIECE_Y, nextPiece, 0);
@@ -361,7 +162,7 @@ void Game::displayStatus()
 }
 
 bool Game::playOneLevel()
-{	
+{
 	discardPendingKeys();
 	m_well->emptyWell(); // ensure well is empty at the beginning of each level
 	rowsLeftUpdate();
@@ -371,20 +172,21 @@ bool Game::playOneLevel()
 	fallX = 4; //initial x coord on screen should start at 4
 	fallY = 0; // initial y coord on screen should start at 0
 	mRotation = 0; // initial rotation will be zero;
-	tetro->choosePieces(currentPiece, nextPiece); // assign the pieces
+	//drawPiece(m_screen, fallX, fallY, currentPiece, mRotation);
+	updatePieces();
 	while (endLevel == false) // loop until game over
 	{
-		fallDown = true; 
+		fallDown = true;
 		levelStarted = true; // the level has started
 		refreshScreen();
 		Timer timer;
 		while (timer.elapsed() < maxTime) // controls the pace of the fall
 		{
 			char userInput;
-			if (fall(4, 0, nextPiece, mRotation, same) == false)
+			if (fall(4, 0, nextPiece, mRotation, same) == false) // if the next piece isnt able to be inserted
 			{
-				endLevel = true;
-				break;
+				endLevel = true; // end the level
+				break; 
 			}
 			if (getCharIfAny(userInput) == true) // check if user input anything
 			{
@@ -394,13 +196,13 @@ bool Game::playOneLevel()
 					if (fall(fallX, fallY, currentPiece, mRotation, down) == true) // if can fall
 					{
 						fallY++; // increase fallY position by 1
-						refreshScreen();
+						refreshScreen(); // refresh the screen
 					}
 					else
 					{
-						m_well->storePiece(fallX, fallY, currentPiece, mRotation); // otherwise store the piece in the well
-						fallDown = false;
-						m_well->display(m_screen, WELL_X, WELL_Y);
+						m_well->storePiece(fallX, fallY, currentPiece, mRotation, currentPieceNum); // otherwise store the piece in the well
+						fallDown = false; // don't have it fall down again
+						m_well->display(m_screen, WELL_X, WELL_Y); // display the well
 						fallX = 4;
 						fallY = 0;
 						mRotation = 0;
@@ -408,7 +210,7 @@ bool Game::playOneLevel()
 					}
 					break;
 				case ARROW_LEFT:
-					if (currentPiece == 9)
+					if (currentPieceNum == 9)
 					{
 						if (fall(fallX, fallY, currentPiece, mRotation, right) == true)
 							fallX++;
@@ -420,7 +222,7 @@ bool Game::playOneLevel()
 					refreshScreen();
 					break;
 				case ARROW_RIGHT:
-					if (currentPiece == 9) // if crazy piece
+					if (currentPieceNum == 9) // if crazy piece
 					{
 						if (fall(fallX, fallY, currentPiece, mRotation, left) == true)
 							fallX--;
@@ -446,7 +248,7 @@ bool Game::playOneLevel()
 					{
 						fallY++;
 					}
-					m_well->storePiece(fallX, fallY, currentPiece, mRotation);
+					m_well->storePiece(fallX, fallY, currentPiece, mRotation, currentPieceNum);
 					m_well->display(m_screen, WELL_X, WELL_Y);
 					fallX = 4;
 					fallY = 0;
@@ -471,7 +273,7 @@ bool Game::playOneLevel()
 				}
 				else
 				{
-					m_well->storePiece(fallX, fallY, currentPiece, mRotation);
+					m_well->storePiece(fallX, fallY, currentPiece, mRotation, currentPieceNum);
 					m_well->display(m_screen, WELL_X, WELL_Y);
 					fallX = 4;
 					fallY = 0;
@@ -483,12 +285,12 @@ bool Game::playOneLevel()
 					refreshScreen();
 			}
 		}
-	}	
-	return nextLevel;  
+	}
+	return nextLevel; 
 }
 
 
-void Game::drawPiece(Screen& screen, int xCoord, int yCoord, int piece, int rotation) // draws the piece in the game
+void Game::drawPiece(Screen& screen, int xCoord, int yCoord, Piece* piece, int rotation) // draws the piece in the game
 {
 	int l = 0;
 	for (int i = xCoord; i < xCoord + 4; i++)
@@ -497,8 +299,8 @@ void Game::drawPiece(Screen& screen, int xCoord, int yCoord, int piece, int rota
 		for (int j = yCoord; j < yCoord + 4; j++)
 		{
 			screen.gotoXY(i, j);
-			if (pieces[piece][rotation][k][l] == '#')
-				screen.printChar(pieces[piece][rotation][k][l]);
+			if (piece->getPiecePart(rotation, l, k) == 1)
+				screen.printChar('#');
 			k++;
 		}
 		l++;
@@ -506,22 +308,20 @@ void Game::drawPiece(Screen& screen, int xCoord, int yCoord, int piece, int rota
 	screen.gotoXY(90000, 1000000);
 }
 
-bool Game::fall(int x, int y, int piece, int rotation, int direction)
+bool Game::fall(int x, int y, Piece* piece, int rotation, int direction)
 {
 	if (m_well->canMove(x, y, piece, rotation, direction))
-	{
 		return true;
-	}
 	return false;
 }
 
-bool Game::rotateCurrentPiece(int piece, int& currentRotation)
+bool Game::rotateCurrentPiece(Piece* piece, int& currentRotation) // rotate the current piece
 {
 	currentRotation++;
 	if (currentRotation == 4)
 	{
 		currentRotation = 0;
-		if (m_well->canRotate(fallX, fallY, piece, currentRotation) == true)
+		if (m_well->canMove(fallX, fallY, piece, currentRotation, 3) == true)
 		{
 			return true;
 		}
@@ -529,7 +329,7 @@ bool Game::rotateCurrentPiece(int piece, int& currentRotation)
 			currentRotation = 3;
 		return false;
 	}
-	if (m_well->canRotate(fallX, fallY, piece, currentRotation) == true)
+	if (m_well->canMove(fallX, fallY, piece, currentRotation, 3) == true)
 	{
 		return true;
 	}
@@ -538,19 +338,19 @@ bool Game::rotateCurrentPiece(int piece, int& currentRotation)
 	return false;
 }
 
-int Game::scoreFunction()
+int Game::scoreFunction() // deterimines the score
 {
 	switch (scoreCalled)
 	{
-	case 0:
+	case 0: 
 		break;
 	case 1:
 		mScore = mScore + 100;
 		break;
-	case 2: 
+	case 2:
 		mScore = mScore + 200;
 		break;
-	case 3: 
+	case 3:
 		mScore = mScore + 300;
 		break;
 	case 4:
@@ -566,19 +366,20 @@ int Game::scoreFunction()
 	return mScore;
 }
 
-void Game::refreshScreen()
+void Game::refreshScreen() // refreshes the screen
 {
-	displayStatus(); // refresh the screen
-	m_well->display(m_screen, WELL_X, WELL_Y);
-	drawPiece(m_screen, fallX, fallY, currentPiece, mRotation);
+	displayStatus(); // update the status
+	m_well->display(m_screen, WELL_X, WELL_Y); // redisplay the well
+	drawPiece(m_screen, fallX, fallY, currentPiece, mRotation); // draw the current piece
+	//m_screen.gotoXY(9999999999999, 999999999); // trying to get the cursor away... didnt work
 }
 
 void Game::rowsLeftUpdate()
 {
-	rowsLeft = 5 * m_level;
+	rowsLeft = 5 * m_level; // rows left at the beginning of each level
 }
 
-string Game::toStringify(int becomeString)
+string Game::toStringify(int becomeString) // general function for the display prompts
 {
 	string str = to_string(becomeString); // convert the number of rows left into a string
 	int len = str.length(); // get the length of the string
@@ -591,44 +392,47 @@ string Game::toStringify(int becomeString)
 	if (becomeString == rowsLeft)
 		return ("Rows Left: " + result);
 	if (becomeString == m_level)
-		return ("Level:     " + result); 
+		return ("Level:     " + result);
 	if (becomeString == mScore)
 		return ("Score:     " + result);
 	else
 		return "";
 }
 
-void Game::removeFilledRows(bool& endLevel, bool& nextLevel)
-{
-	for (int i = 0; i < 18; i++)
+void Game::removeFilledRows(bool& endLevel, bool& nextLevel) // called once a piece is stored
+{ 
+	for (int i = 0; i < 18; i++) // loop over every row besides the very bottom wall
 	{
-		if (m_well->isRowFull(i) == true)
+		if (m_well->isRowFull(i) == true) // if the row is filled
 		{
-			scoreCalled++;
-			rowsLeft--;
-			if (rowsLeft <= 0)
+			scoreCalled++; // increment the number of times scoreCalled
+			rowsLeft--; // decrease number of rows left
+			if (rowsLeft <= 0) // if rows left is 0 or less
 			{
-				endLevel = true;
-				nextLevel = true;
-				m_well->display(m_screen, WELL_X, WELL_Y);
-				fallX = 4;
-				fallY = 0;
-				mRotation = 0;
-				break;
+				endLevel = true; // end the level
+				nextLevel = true; // move on to the next level
+				m_well->display(m_screen, WELL_X, WELL_Y); // display the well once more
 			}
-			else
+			else // if not yet ended level
 			{
-				m_well->deleteRow(i);
-				discardPendingKeys();
+				m_well->deleteRow(i); // delete the full row
+				discardPendingKeys(); 
 			}
 		}
 	}
-	scoreFunction();
-	if (rowsLeft <= 0)
-		displayStatus();
-	else
+	scoreFunction(); // call the score function to determine how many points to add to the score
+	if (rowsLeft <= 0) // if level ended
+		displayStatus(); // only redisplay the status, not refresh the screen
+	else // if level not ended
 	{
-		tetro->choosePieces(currentPiece, nextPiece);
+		updatePieces(); // give the next piece pointer a new piece
 		discardPendingKeys();
 	}
+}
+
+Game::~Game()
+{
+	delete m_well;
+	delete currentPiece;
+	delete nextPiece;
 }
