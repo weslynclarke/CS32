@@ -8,18 +8,7 @@ using namespace std;
 
 Well::Well()
 {
-	piecetype = new Piece;
-	for (int i = 0; i < rows; i++)
-	{
-		for (int j = 0; j < cols; j++)
-		{
-			// if cols = 0 or 11
-			if ((j == 0 || j == cols - 1) || i == rows-1)
-				mWell[i][j] = '@';
-			else
-				mWell[i][j] = ' ';
-		}
-	}
+	emptyWell(); // create an empty well
 }
 
 void Well::display(Screen& screen, int x, int y) // displays the empty well on the screen
@@ -41,10 +30,10 @@ void Well::emptyWell()
 		for (int j = 0; j < cols; j++)
 		{
 			// if cols = 0 or 11
-			if ((j == 0 || j == cols - 1) || i == rows - 1)
+			if ((j == 0 || j == cols - 1) || i == rows - 1) // walls are @
 				mWell[i][j] = '@';
 			else
-				mWell[i][j] = ' ';
+				mWell[i][j] = ' '; // otherwise empty space
 		}
 	}
 }
@@ -56,7 +45,7 @@ bool Well::spaceClear(int xCoord, int yCoord) // check if the space is clear
 	return false; // else return false
 }
 
-bool Well::canMove(int xCoord, int yCoord, int piece, int rotation, int direction) // can you move the tetromino?
+bool Well::canMove(int xCoord, int yCoord, Piece* piece, int rotation, int direction) // can you move the tetromino?
 {
 	int xWell = xCoord;
 	if (direction == 0) // if direction is down
@@ -66,10 +55,9 @@ bool Well::canMove(int xCoord, int yCoord, int piece, int rotation, int directio
 			xWell = xCoord;
 			for (int j = 0; j < 4; j++)
 			{
-				if (piecetype->getTetrominoPart(piece, rotation, j, i) == 1 && !spaceClear(xWell, yCoord + 1)) //if space isnt clear
+				if (piece->getPiecePart(rotation, j, i) == 1 && !spaceClear(xWell, yCoord + 1)) //if space isnt clear
 					return false; // return false
-				// else continue looping
-				xWell++;
+				xWell++; // else continue looping
 			}
 			yCoord++;
 		}
@@ -81,10 +69,9 @@ bool Well::canMove(int xCoord, int yCoord, int piece, int rotation, int directio
 			xWell = xCoord;
 			for (int j = 0; j < 4; j++)
 			{
-				if (piecetype->getTetrominoPart(piece, rotation, j, i) == 1 && !spaceClear(xWell + 1, yCoord)) //if space isnt clear
+				if (piece->getPiecePart(rotation, j, i) == 1 && !spaceClear(xWell + 1, yCoord)) //if space isnt clear
 					return false; // return false
-				// else continue looping
-				xWell++;
+				xWell++; // else continue looping
 			}
 			yCoord++;
 		}
@@ -96,10 +83,9 @@ bool Well::canMove(int xCoord, int yCoord, int piece, int rotation, int directio
 			xWell = xCoord;
 			for (int j = 0; j < 4; j++)
 			{
-				if (piecetype->getTetrominoPart(piece, rotation, j, i) == 1 && !spaceClear(xWell - 1, yCoord)) //if space isnt clear
+				if (piece->getPiecePart(rotation, j, i) == 1 && !spaceClear(xWell - 1, yCoord)) //if space isnt clear
 					return false; // return false
-				// else continue looping
-				xWell++;
+				xWell++; // else continue looping
 			}
 			yCoord++;
 		}
@@ -111,11 +97,8 @@ bool Well::canMove(int xCoord, int yCoord, int piece, int rotation, int directio
 			xWell = xCoord;
 			for (int j = 0; j < 4; j++)
 			{
-				if (piecetype->getTetrominoPart(piece, rotation, j, i) == 1) // if tetromino part is a #
-				{
-					if (!spaceClear(xWell, yCoord)) //if space isnt clear
+				if (piece->getPiecePart(rotation, j, i) == 1 && !spaceClear(xWell, yCoord)) // if tetromino part is a # and space isnt clear
 						return false; // return false
-				}
 				// else continue looping
 				xWell++;
 			}
@@ -125,20 +108,15 @@ bool Well::canMove(int xCoord, int yCoord, int piece, int rotation, int directio
 	return true; // generally return true
 }
 
-bool Well::canRotate(int xCoord, int yCoord, int piece, int rotation)
+void Well::storePiece(int xCoord, int yCoord, Piece* piece, int rotation, int pieceNum)
 {
-	return(canMove(xCoord, yCoord, piece, rotation, 3));
-}
-
-void Well::storePiece(int xCoord, int yCoord, int piece, int rotation)
-{
-	if (piece == 8)
+	if (pieceNum == 8)
 	{
 		foamX = xCoord + 1;
 		foamY = yCoord + 1;
 		foamBomb(foamX, foamY);
 	}
-	else if (piece == 7)
+	else if (pieceNum == 7)
 		vaporBomb(xCoord, yCoord);
 	else
 	{
@@ -147,7 +125,7 @@ void Well::storePiece(int xCoord, int yCoord, int piece, int rotation)
 			int x = xCoord; // set x back to the x coord before each loop
 			for (int j = 0; j < 4; j++) // loop over tetromino's columns
 			{
-				if (piecetype->getTetrominoPart(piece, rotation, j, i) == 1) // if piece is #
+				if (piece->getPiecePart(rotation, j, i) == 1) // if piece is #
 					mWell[yCoord][x] = '$'; // store at the x and y coordinate of the well $
 				x++; // increase x by one
 			}
@@ -158,7 +136,7 @@ void Well::storePiece(int xCoord, int yCoord, int piece, int rotation)
 
 void Well::foamBomb(int xCoord, int yCoord)
 {
-	int x = xCoord; 
+	int x = xCoord;
 	int y = yCoord;
 	queue<int> xcoords; // one to track the x coordinates 
 	queue<int> ycoords; // one to track the y coordinates
@@ -167,25 +145,25 @@ void Well::foamBomb(int xCoord, int yCoord)
 	while ((x >= xCoord - 2 && x <= xCoord + 2) && (y >= yCoord - 2 && y <= yCoord + 2) && !xcoords.empty() && !ycoords.empty())
 	{
 		mWell[y][x] = '*'; // set the coordinate in the well to *
-		if (y-1 >= yCoord - 2 && spaceClear(x, y - 1)) // check north
+		if (y - 1 >= yCoord - 2 && spaceClear(x, y - 1)) //check north
 		{
 			xcoords.push(x);
 			ycoords.push(y - 1);
 			mWell[y - 1][x] = '.';
 		}
-		if (x-1 >= xCoord - 2 && spaceClear(x - 1, y)) // check west
+		if (x - 1 >= xCoord - 2 && spaceClear(x - 1, y)) // check west
 		{
 			xcoords.push(x - 1);
 			ycoords.push(y);
 			mWell[y][x - 1] = '.';
 		}
-		if (y+1 <= yCoord + 2 && spaceClear(x, y + 1)) // check south
+		if (y + 1 <= yCoord + 2 && spaceClear(x, y + 1)) // check south
 		{
 			xcoords.push(x);
 			ycoords.push(y + 1);
 			mWell[y + 1][x] = '.';
 		}
-		if (x+1 <= xCoord + 2 && spaceClear(x + 1, y)) // check east
+		if (x + 1 <= xCoord + 2 && spaceClear(x + 1, y)) // check east
 		{
 			xcoords.push(x + 1);
 			ycoords.push(y);
@@ -215,23 +193,23 @@ void Well::foamBomb(int xCoord, int yCoord)
 
 
 void Well::vaporBomb(int xCoord, int yCoord)
-{ 
-	while (yCoord - 2 >= 0) // y can never be less than zero
+{
+	int y;
+	if (yCoord - 2 <= 0) // if vapor bomb is at top or close to the top
+		y = 0; // start at the top
+	else
+		y = yCoord - 2; // start two rows above
+	int x = xCoord + 1; // start one x coord to the right since the vapor bomb block starts one over
+	for (int i = 0; i < 5; i++) // loop for above and below vaporBomb and vapor bomb itself
 	{
-		int y = yCoord - 2; // start two rows above
-		int x = xCoord + 1; // start one x coord to the right since the vapor bomb block starts one over
-		for (int i = 0; i < 5; i++) // loop for above and below vaporBomb and vapor bomb itself
+		for (int j = 0; j < 2; j++) // loop over the 2 coordinates
 		{
-			for (int j = 0; j < 2; j++) // loop over the 2 coordinates
-			{
-				if (mWell[y][x] != '@')
-					mWell[y][x] = ' ';
-				x++;
-			}
-			x = x - 2; // set x back to original coordinate
-			y++; // increase y by one, only 5 times
+			if (mWell[y][x] != '@') // if not equal to a wall
+				mWell[y][x] = ' '; // make it empty
+			x++; // increment x
 		}
-		break; // don't save the piece
+		x = x - 2; // set x back to original coordinate
+		y++; // increase y by one, only 5 times
 	}
 }
 
@@ -253,7 +231,7 @@ void Well::deleteRow(int yRow)
 		{
 			for (int j = 0; j < cols; j++) // use width - 1 because width-1 element is the wall
 			{
-				if (j == 0 || j == cols-1)
+				if (j == 0 || j == cols - 1)
 					mWell[i][0] = '@'; // set top row to empty
 				else
 					mWell[i][0] = ' '; // set top row to empty
