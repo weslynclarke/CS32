@@ -10,6 +10,9 @@ const char ARROW_RIGHT = '6';
 
 ///////////////////////////////////////////////////////////
 // Screen -- Visual Output
+//
+// UserInterfaceWindows.cpp created and provided by David Smallberg for project purposes.
+// Copyright (c) 2018 David Smallberg. All rights reserved.
 ///////////////////////////////////////////////////////////
 
 class ScreenImpl;
